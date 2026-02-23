@@ -134,6 +134,16 @@ export const ERROR_CODES = {
   UNKNOWN: 'ERR_UNKNOWN',
 } as const;
 
+// User-friendly messages for each error code
+export const ERROR_MESSAGES: Record<string, string> = {
+  [ERROR_CODES.PRICE_CALC_FAILED]: 'We couldn\'t calculate the price. Please try again or contact support.',
+  [ERROR_CODES.VALIDATION_CONFLICT]: 'Some of your selected options are incompatible. Please review your choices.',
+  [ERROR_CODES.NETWORK_TIMEOUT]: 'The connection timed out. Please check your internet and try again.',
+  [ERROR_CODES.INVALID_QUANTITY]: 'Please enter a valid quantity (at least 1).',
+  [ERROR_CODES.DEPENDENCY_MISSING]: 'This option requires another option to be enabled first.',
+  [ERROR_CODES.UNKNOWN]: 'Something unexpected happened. Please try again or contact support.',
+};
+
 export type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES];
 
 // Event types for callbacks
