@@ -355,6 +355,20 @@
 
 .price-loading {
   opacity: 0.5;
+  position: relative;
+}
+
+.price-loading .price-value::after {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+  margin-left: 8px;
+  vertical-align: middle;
 }
 
 /* Buttons */
@@ -413,28 +427,6 @@
   margin-top: 16px;
 }
 
-/* Quick Add Button */
-.quick-add-section {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.quick-add-btn {
-  width: 100%;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px dashed rgba(255, 255, 255, 0.3);
-  border-radius: 6px;
-  color: white;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.quick-add-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
 
 /* Draft Management */
 .draft-section {
@@ -615,8 +607,10 @@
   outline-offset: 2px;
 }
 
-/* Missing focus style for color swatches - accessibility issue */
-/* .color-swatch:focus { } */
+.color-swatch:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+}
 
 /* Draft List in Modal */
 .draft-list {

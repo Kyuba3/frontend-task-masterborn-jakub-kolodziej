@@ -34,7 +34,7 @@ import type {
   Draft,
   ValidationResult,
 } from "./types";
-import { ERROR_CODES } from "./types";
+import { ERROR_CODES, ERROR_MESSAGES } from "./types";
 import { usePriceCalculation } from "../../hooks/usePriceCalculation";
 import {
   validateConfiguration,
@@ -208,6 +208,10 @@ export const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({
 
     window.addEventListener("resize", handleResize);
     handleResize();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   useEffect(() => {
@@ -303,18 +307,16 @@ export const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({
           (a) => a.dependsOn?.optionId === optionId,
         );
 
-        for (const addOn of dependentAddOns) {
-          if (addOn.dependsOn && value !== addOn.dependsOn.requiredValue) {
-            const index = selectedAddOns.indexOf(addOn.id);
-            if (index > -1) {
-              selectedAddOns.splice(index, 1);
-              setSelectedAddOns(selectedAddOns);
-            }
-          }
+        const toRemove = dependentAddOns
+          .filter((a) => a.dependsOn && value !== a.dependsOn.requiredValue)
+          .map((a) => a.id);
+
+        if (toRemove.length > 0) {
+          setSelectedAddOns((prev) => prev.filter((id) => !toRemove.includes(id)));
         }
       }
     },
-    [product.options, product.addOns, selectedAddOns],
+    [product.options, product.addOns],
   );
 
   const handleAddOnToggle = useCallback(
@@ -398,11 +400,7 @@ export const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({
     }
   }, [validation, price, currentConfig, onAddToCart]);
 
-  const handleQuickAdd = useCallback(() => {
-    if (price && onAddToCart) {
-      onAddToCart(currentConfig, price);
-    }
-  }, [price, currentConfig, onAddToCart]);
+
 
   const handleCopyShareUrl = useCallback(() => {
     navigator.clipboard
@@ -493,9 +491,9 @@ export const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({
           role="radiogroup"
           aria-label={option.name}
         >
-          {option.choices?.map((choice, index) => (
+          {option.choices?.map((choice) => (
             <div
-              key={index}
+              key={choice.id}
               className={`color-swatch ${currentValue === choice.value ? "selected" : ""}`}
               style={{ backgroundColor: choice.colorHex }}
               onClick={() =>
@@ -504,6 +502,13 @@ export const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({
               title={choice.label}
               role="radio"
               aria-checked={currentValue === choice.value}
+              tabIndex={readOnly ? -1 : 0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  if (!readOnly) handleOptionChange(option.id, choice.value);
+                }
+              }}
             />
           ))}
         </div>
@@ -615,7 +620,7 @@ export const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({
 
     return (
       <div
-        key={addOn.name}
+        key={addOn.id}
         className={`addon-item ${isSelected ? "selected" : ""} ${!isAvailable ? "disabled" : ""}`}
         onClick={() => !readOnly && isAvailable && handleAddOnToggle(addOn.id)}
       >
@@ -623,7 +628,7 @@ export const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({
           type="checkbox"
           className="addon-checkbox"
           checked={isSelected}
-          onChange={() => {}}
+          onChange={() => { }}
           disabled={readOnly || !isAvailable}
         />
         <div className="addon-info">
@@ -877,8 +882,7 @@ export const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({
 
       {(error || priceError) && (
         <div className="error-message">
-          <div>Something went wrong. Please try again.</div>
-          <div className="error-code">Error: {error || priceError}</div>
+          <div>{ERROR_MESSAGES[error || priceError || ''] || 'Something went wrong. Please try again.'}</div>
         </div>
       )}
 
@@ -925,15 +929,7 @@ export const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({
 
             {renderPriceBreakdown()}
 
-            <div className="quick-add-section">
-              <button
-                className="quick-add-btn"
-                onClick={handleQuickAdd}
-                disabled={readOnly || !validation?.valid}
-              >
-                ⚡ Quick Add to Cart
-              </button>
-            </div>
+
           </div>
 
           <button

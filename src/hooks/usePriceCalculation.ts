@@ -44,7 +44,8 @@ export function usePriceCalculation(
     try {
       const response: PriceResponse = await calculatePrice(config, product);
 
-      if (response.timestamp >= latestRequestRef.current) {
+      // Only apply if this is still the latest request (prevents race conditions)
+      if (requestTime === latestRequestRef.current) {
         setPrice(response.breakdown);
         setFormattedTotal(response.formattedTotal);
       }
