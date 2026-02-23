@@ -222,15 +222,18 @@ export function encodeConfigurationToUrl(config: Configuration): string {
     q: config.quantity,
   });
 
-  return btoa(data);
+  return encodeURIComponent(data);
 }
 
 /**
  * Decode configuration from URL string
  */
-export function decodeConfigurationFromUrl(encoded: string): Partial<Configuration> | null {
+export function decodeConfigurationFromUrl(
+  encoded: string,
+): Partial<Configuration> | null {
   try {
-    const data = JSON.parse(atob(encoded));
+    const data = JSON.parse(decodeURIComponent(encoded));
+
     return {
       selections: data.s || {},
       addOns: data.a || [],
